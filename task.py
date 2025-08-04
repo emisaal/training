@@ -1,3 +1,5 @@
+from typing import Self
+
 
 class List:
     first_node = None
@@ -24,14 +26,14 @@ class Node:
     next_node = None
     index = None
 
-    def __init__(self, data, index) -> None:
+    def __init__(self, data: any, index: int) -> None:
         self.data = data
         self.index = index
 
-    def assign_data(self, data) -> None:
+    def assign_data(self, data: any) -> None:
         self.data = data
 
-    def assign_next_node(self, next_node) -> None:
+    def assign_next_node(self, next_node: Self) -> None:
         self.next_node = next_node
 
     def __str__(self) -> str:
