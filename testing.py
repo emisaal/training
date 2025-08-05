@@ -1,14 +1,14 @@
-from task import List, Node
+from task import List, _Node
 import pytest
 
 empty_list = List()
 
 
 def test_node_class():
-    """Test Node class object creation."""
+    """Test _Node class object creation."""
 
-    new_obj = Node("apple")
-    new_obj2= Node(555, new_obj)
+    new_obj = _Node("apple")
+    new_obj2= _Node(555, new_obj)
 
     assert new_obj.data == "apple"
     assert new_obj.next == None
@@ -59,6 +59,7 @@ def test_list_append_extend():
     custom_list = List((1, 2, "apple"))
     custom_list2 = List(("a", "b", 777))
 
+    assert custom_list.__len__() == 3
     assert custom_list.append(999) == None
     assert custom_list.__len__() == 4
     assert str(custom_list) == '[1, 2, apple, 999]'
@@ -134,10 +135,27 @@ def test_insert():
     """"""
 
     custom_list = List((1, 2, "apple"))
-    custom_list2 = List(("a", "b", 777))
-    
+
     custom_list.insert(0, 'insert1')
     assert custom_list[0] == 'insert1'
     assert str(custom_list) == '[insert1, 1, 2, apple]'
+
+    with pytest.raises(IndexError):
+        custom_list.insert(5, 'insert5')
+
+    custom_list.insert(-1, 'insert_last')
+    assert custom_list[-1] == 'insert_last'
+    assert str(custom_list) == '[insert1, 1, 2, apple, insert_last]'
+
+    custom_list.insert(2, 'insert2')
+    assert str(custom_list) == '[insert1, 1, insert2, 2, apple, insert_last]'
     
+def test_remove():
+    """"""
+    custom_list = List((1, 2, "apple"))
+    custom_list2 = List((1, 2, "apple", 2))
+
+    custom_list.remove(2)
+    assert str(custom_list) == '[1, apple]'
+
     
