@@ -35,9 +35,6 @@ class List:
     def _find_node(self, index: int) -> Node | None:
         """Find Node object based on provided index."""
 
-        if not isinstance(index, int):
-            raise TypeError
-
         if self._first_node is None:
             raise IndexError
 
@@ -60,11 +57,17 @@ class List:
     def __getitem__(self, index: int) -> any:
         """Called to implement evaluation of self[key]."""
 
+        if not isinstance(index, int):
+            raise TypeError
+
         node = self._find_node(index)
         return node.data
 
     def __setitem__(self, index, data):
         """Called to implement assignment to self[key]."""
+
+        if not isinstance(index, int):
+            raise TypeError
 
         node = self._find_node(index)
         node.data = data
@@ -72,36 +75,33 @@ class List:
     def __delitem__(self, index: int):
         """Called to implement deletion of self[key]."""
 
+        if not isinstance(index, int):
+            raise TypeError
+
         if index == -1:
             prev_node = self._find_node(-2)
             prev_node.next = None
-            self._lenght -= 1
-            return
 
-        if index == 0:
+        elif index == 0:
             self._first_node = self._first_node.next
-            self._lenght -= 1
-            return
 
-        if index < 0:
-            index = self._lenght + index
+        else:
+            if index < 0:
+                index = self._lenght + index
 
-        prev_node = self._find_node(index - 1)
-        prev_node.next = prev_node.next.next
+            prev_node = self._find_node(index - 1)
+            prev_node.next = prev_node.next.next
+
         self._lenght -= 1
+        return
 
     def __iter__(self):
         """This method is called when an iterator is required for a container."""
 
-        if self._first_node is None:
-            return
-
-        curr_node = self._first_node
-        yield curr_node.data
-
-        while curr_node.next is not None:
-            yield curr_node.next.data
-            curr_node = curr_node.next
+        node = self._first_node
+        while node is not None:
+            yield node.data
+            node = node.next
 
     def append(self, data: any):
         """Add an item to the end of the list."""
@@ -118,3 +118,22 @@ class List:
         for data in args:
             self.append(data)
 
+    def insert(self, index: int, data: any):
+        """Insert an item at a given position."""
+
+        if not isinstance(index, int):
+            raise TypeError
+
+        if index < 0:
+            index = self._lenght + index
+
+        new_node = Node(data)
+        
+        if index == 0:
+            self._first_node = new_node
+        prev_node = self._find_node(index - 1 if index != 0 else 0)
+
+        if prev_node is not None:
+            new_node.next = prev_node.next
+            prev_node.next = new_node
+        

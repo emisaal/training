@@ -30,8 +30,8 @@ def test_list_len():
 
     custom_list = List((1, 2, "apple"))
     
-    assert len(custom_list) == 3
-    assert len(empty_list) == 0
+    assert custom_list.__len__() == 3
+    assert empty_list.__len__() == 0
 
 def test_list__getitem__():
     """Test __getitem__."""
@@ -109,6 +109,7 @@ def test_del_item():
 
     assert str(custom_list) == '[2, apple]'
     assert custom_list.__len__() == 2
+    assert len(custom_list) == 2
 
     custom_list2.__delitem__(-1)
 
@@ -128,4 +129,15 @@ def test_del_item():
     assert custom_list3[-4] == 71
     assert custom_list3[2] == 'apple'
 
+
+def test_insert():
+    """"""
+
+    custom_list = List((1, 2, "apple"))
+    custom_list2 = List(("a", "b", 777))
+    
+    custom_list.insert(0, 'insert1')
+    assert custom_list[0] == 'insert1'
+    assert str(custom_list) == '[insert1, 1, 2, apple]'
+    
     
