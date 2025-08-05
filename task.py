@@ -106,11 +106,7 @@ class List:
     def append(self, data: any):
         """Add an item to the end of the list."""
 
-        last_node = self._find_node(-1)
-
-        new_node = Node(data)
-        last_node.next = new_node
-        self._lenght += 1
+        self.insert(-1, data)
     
     def extend(self, args):
         """Extend the list by appending all the items from the iterable."""
@@ -124,16 +120,13 @@ class List:
         if not isinstance(index, int):
             raise TypeError
 
-        if index < 0:
-            index = self._lenght + index
-
         new_node = Node(data)
-        
-        if index == 0:
-            self._first_node = new_node
-        prev_node = self._find_node(index - 1 if index != 0 else 0)
+        node = self._find_node(index)
+        if index == -1 or index == self._lenght -1:
+            node.next = new_node
 
-        if prev_node is not None:
-            new_node.next = prev_node.next
-            prev_node.next = new_node
-        
+        if index == 0:
+            new_node.next = self._first_node
+            self._first_node = new_node
+
+        self._lenght += 1
