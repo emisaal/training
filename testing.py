@@ -152,10 +152,56 @@ def test_insert():
     
 def test_remove():
     """"""
+
     custom_list = List((1, 2, "apple"))
     custom_list2 = List((1, 2, "apple", 2))
 
     custom_list.remove(2)
     assert str(custom_list) == '[1, apple]'
 
+    assert custom_list2.remove('apple') == None
+    assert str(custom_list2) == '[1, 2, 2]'
+
+def test_pop():
+    """"""
+
+    custom_list = List((1, 2, "apple"))
+    custom_list2 = List((1, 2, "apple", 2))
     
+    assert custom_list.pop() == 'apple'
+    assert str(custom_list) == '[1, 2]'
+    assert custom_list.__len__() == 2
+
+    assert custom_list.pop(1) == 2
+    assert str(custom_list) == '[1]'
+    assert custom_list.__len__() == 1
+
+    assert custom_list2.pop(0) == 1
+    assert str(custom_list2) == '[2, apple, 2]'
+    assert custom_list2.__len__() == 3
+
+def test_clear():
+    """"""
+    custom_list = List((1, 2, "apple"))
+    custom_list.clear()
+    assert len(custom_list) == 0
+    assert str(custom_list) == '[]'
+
+def test_count_contains():
+    """"""
+
+    custom_list = List((1, 2, "apple"))
+    
+    assert custom_list.count(2) == 1
+    assert custom_list.__contains__(2) == True
+    assert custom_list.count('apple') == 1
+    assert custom_list.count(999) == 0
+    assert custom_list.__contains__(999) == False
+
+    custom_list2 = List((1, 2, 2, "apple", 2, 2, None))
+
+    assert custom_list2.count(2) == 4
+    assert custom_list2.__contains__(2) == True
+    assert custom_list2.count(None) == 1
+    assert custom_list2.count(0) == 0
+    assert custom_list2.__contains__(0) == False
