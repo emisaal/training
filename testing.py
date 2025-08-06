@@ -53,6 +53,19 @@ def test_list__getitem__():
         empty_list[0]
         custom_list[5]
 
+    custom_list2 = List((1, 2, "apple"))
+
+    # start idx
+    assert custom_list2[0::] == '[1, 2, apple]'
+    assert custom_list2[1::] == '[2, apple]'
+    assert custom_list2[2::] == '[apple]'
+    assert custom_list2[3::] == '[]'
+
+    # stop idx
+
+    
+    # step
+
 def test_list_append_extend():
     """"""
 
@@ -92,10 +105,8 @@ def test_set_item():
 def test_iter():
     """"""
 
-    custom_list = List((1, 2, "apple"))
     custom_list2 = List(("a", "b", 777))
 
-    assert [[data] for data in custom_list] == [[1], [2], ['apple']]
     assert [[data] for data in custom_list2] == [['a'], ['b'], [777]]
     assert [[data] for data in empty_list] == []
 

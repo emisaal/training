@@ -46,22 +46,21 @@ class List:
     def _find_node(self, index: int = None) -> _Node | None:
         """Find _Node object based on provided index."""
 
-        if index is not None:
-            if self._first_node is None:
-                raise IndexError
-
-            index = self._get_positive_index(index)
-            node = self._first_node
-            idx = 0
-
-            while node is not None:
-                if idx == index:
-                    return node
-
-                node = node.next
-                idx += 1
-
+        if self._first_node is None:
             raise IndexError
+
+        index = self._get_positive_index(index)
+        node = self._first_node
+        idx = 0
+
+        while node is not None:
+            if idx == index:
+                return node
+
+            node = node.next
+            idx += 1
+
+        raise IndexError
 
     def _remove_item(self, index: int | None = None, data: any = '') -> any:
         """Remove item based on provided index or data."""
@@ -104,14 +103,49 @@ class List:
 
             raise ValueError
 
-    def __getitem__(self, index: int) -> any:
+    def _get_start_stop_step(self, index: slice) -> tuple:
+        """"""
+        
+        start_idx = 0
+        stop_idx = self._get_positive_index(-1)
+        step = 1 if index.step is None else index.step
+
+        if index.start is not None:
+            start_idx = self._get_positive_index(index.start)
+
+        if index.stop is not None:
+            stop_idx = self._get_positive_index(index.stop)
+
+        return start_idx, stop_idx, step
+
+    def __getitem__(self, index: int | slice) -> any:
         """Called to implement evaluation of self[key]."""
 
-        if not isinstance(index, int):
-            raise TypeError
+        if isinstance(index, int):
+            node = self._find_node(index)
+            return node.data
 
-        node = self._find_node(index)
-        return node.data
+        elif isinstance(index, slice):
+            start_idx, stop_idx, step = self._get_start_stop_step(index)
+            out_data = ''
+            idx = 0
+
+            if stop_idx == 0 or start_idx >= self._length:
+                return '[]'
+
+            for node_data in self:
+                if idx >= start_idx:
+                    out_data += f'{str(node_data)}'
+                else:
+                    idx += 1
+                    continue
+
+                if idx >= stop_idx:
+                    return f'[{out_data}]'
+                idx += 1
+                out_data += f', '
+
+        raise TypeError
 
     def __setitem__(self, index, data) -> None:
         """Called to implement assignment to self[key]."""
