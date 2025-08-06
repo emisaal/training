@@ -5,6 +5,8 @@ class _Node:
         self.data = data
         self.next = next
 
+    def __str__(self):
+        return str(self.data)
 
 class List:
     def __init__(self, args: any = None) -> None:
@@ -36,12 +38,22 @@ class List:
         """Called to implement the built-in function len()."""
         return self._length
 
+    def _reverse(self, node):
+        """"""
+
+        reversed_string = str(node.data)
+
+        if node.next is not None:
+            return self._reverse(node.next)  + ', '+  reversed_string
+        return reversed_string  # last node
+
+    def _get_reversed_list(self):
+        return self._reverse(node=self._first_node)
+
     def _get_positive_index(self, index: int) -> int:
         """Change provided index into a positive index."""
-        
-        if index < 0:
-            index = self._length + index
-        return index
+
+        return self._length + index if index < 0 else index
 
     def _find_node(self, index: int = None) -> _Node | None:
         """Find _Node object based on provided index."""
