@@ -1,7 +1,7 @@
 from task import List, _Node
 import pytest
 
-LIST = list
+LIST = List
 empty_list = LIST()
 
 

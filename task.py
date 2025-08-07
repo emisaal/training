@@ -5,8 +5,7 @@ class _Node:
         self.data = data
         self.next = next
 
-    def __str__(self):
-        return str(self.data)
+
 
 class List:
     def __init__(self, args: any = None) -> None:
@@ -29,10 +28,10 @@ class List:
             curr_node = next_node
 
     def __str__(self) -> str:
-        return f"[{', '.join(str(data) for data in self)}]"
+        return f"[{', '.join(repr(data) for data in self)}]"
 
     def __repr__(self) -> str:
-        return f"[{', '.join(str(data) for data in self)}]"
+        return str(self)
 
     def __len__(self) -> int:
         """Called to implement the built-in function len()."""
@@ -147,7 +146,7 @@ class List:
 
             for node_data in self:
                 if idx >= start_idx:
-                    out_data += f'{str(node_data)}'
+                    out_data += f'{repr(node_data)}'
                 else:
                     idx += 1
                     continue
@@ -194,7 +193,7 @@ class List:
     def append(self, data: any) -> None:
         """Add an item to the end of the list."""
 
-        self.insert(-1, data)
+        self.insert(self._length, data)
     
     def extend(self, args) -> None:
         """Extend the list by appending all the items from the iterable."""
@@ -208,7 +207,11 @@ class List:
         if not isinstance(index, int):
             raise TypeError
 
-        index = self._get_positive_index(index)
+        if index < -1:
+            index = self._get_positive_index(index)
+
+        if index >= self._length:
+            index = self._length - 1
 
         node = self._find_node(index)
         new_node = _Node(data)
