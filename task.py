@@ -1,36 +1,42 @@
 from typing import Self
 
 class _Node:
-    def __init__(self, data: any, next: any = None) -> None:
+    def __init__(self, data: any, next: Self | None = None, prev: Self | None = None) -> None:
         self.data = data
         self.next = next
+        self.prev = prev
 
 
 class List:
     def __init__(self, args: any = None) -> None:
         self._first_node = None
+        self._last_node = None
         self._length = 0
 
         if args is None:
+            return
+
+        if not isinstance(args, tuple):
+            self._first_node = self._last_node = _Node(data=args)
+            self._length = 1
             return
 
         self._length += len(args)
 
         for data in args:
             if self._first_node is None:
-                self._first_node = _Node(data)
-                curr_node = self._first_node
+                self._first_node = _Node(data=data)
+                node = self._first_node
                 continue
 
-            next_node = _Node(data)
-            curr_node.next = next_node
-            curr_node = next_node
+            next_node = _Node(data=data, prev=node)
+            node.next = next_node
+            node = next_node
 
-    def __str__(self) -> str:
-        return f"[{', '.join(repr(data) for data in self)}]"
+        self._last_node = node
 
     def __repr__(self) -> str:
-        return str(self)
+        return f"[{', '.join(f'{data!r}' for data in self)}]"
 
     def __len__(self) -> int:
         """Called to implement the built-in function len()."""
@@ -48,14 +54,11 @@ class List:
             raise IndexError
 
         index = self._get_positive_index(index)
-        node = self._first_node
         idx = 0
 
-        while node is not None:
+        for node in self._node_iter():
             if idx == index:
                 return node
-
-            node = node.next
             idx += 1
 
         raise IndexError
@@ -166,12 +169,12 @@ class List:
             if node_data == data:
                 return True
 
-    def _node_iter(self):
+    def _node_iter(self, last: bool = False):
         """Iterate nodes."""
-        node = self._first_node
+        node = self._last_node if last else self._first_node
         while node is not None:
             yield node
-            node = node.next
+            node = node.next if self._first_node else node.prev
 
     def __iter__(self) -> None:
         """This method is called when an iterator is required for a container."""
@@ -182,13 +185,11 @@ class List:
     def _reverse_node_iter(self, node):
         """Reverse iteration."""
 
-        if node.next is not None:
-            yield from self._reverse_node_iter(node.next)
-        yield node
+        self._node_iter(last=True)
 
     def __reversed___(self) -> None:
         """Called (if present) by the reversed() built-in to implement reverse iteration."""
-        for node in self._reverse_node_iter(self._first_node):
+        for node in _reverse_node_iter():
             yield node.data
 
     def append(self, data: any) -> None:
@@ -208,26 +209,40 @@ class List:
         if not isinstance(index, int):
             raise TypeError
 
+        if self._first_node is None:
+            self._first_node = _Node(data=data)
+            self._length = 1
+            return
+
         if index < -1:
             index = self._get_positive_index(index)
 
         if index >= self._length:
             index = self._length - 1
 
+        new_node = _Node(data=data)
         node = self._find_node(index)
-        new_node = _Node(data)
 
+        # insert as last node in the list
         if index == self._length - 1:
             node.next = new_node
+            new_node.prev = node
+            self._last_node = new_node
 
+        # insert as the first element
         elif index == 0:
             new_node.next = self._first_node
+            self._first_node.prev = new_node
             self._first_node = new_node
 
+        # insert in the middle of the list
         else:
+            node.prev.next = new_node
+
             new_node.next = node
-            prev_node = self._find_node(index - 1)
-            prev_node.next = new_node
+            new_node.prev = node.prev
+
+            node.prev = new_node
 
         self._length += 1
         return
@@ -276,28 +291,20 @@ class List:
                 count += 1
  
         return count
-
-    def sort(self, key: any, reverse: bool = False):
-         """Sort the items of the list in place."""
-         pass
     
     def reverse(self):
         """Reverse the elements of the list in place."""
 
-        # [1, 2, 3]
-        prev_node = None # '3, none' -> '3, 2' -> '2, 1' -> '1, 2'
-
-        for node in self._reverse_node_iter(self._first_node):
+        prev_node = None
+        for node in self._node_iter(last=True):
+            node.next = node.prev
+            node.prev = prev_node
 
             if prev_node is None:
-                prev_node = node
                 self._first_node = node
-                continue
 
-            prev_node.next = node
             prev_node = node
-
-        prev_node.next = None
+        self._last_node = node
 
     def copy(self):
         return List(self)

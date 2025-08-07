@@ -9,18 +9,28 @@ def test_node_class():
     """Test _Node class object creation."""
 
     new_obj = _Node("apple")
-    new_obj2= _Node(555, new_obj)
+    new_obj2= _Node(555, prev=new_obj)
+    new_obj.next = new_obj2
+    new_obj3= _Node(555, prev=new_obj2)
+    new_obj2.next=new_obj3
 
     assert new_obj.data == "apple"
-    assert new_obj.next == None
+    assert new_obj.next == new_obj2
+    assert new_obj.prev == None
     assert new_obj2.data == 555
-    assert new_obj2.next == new_obj
+    assert new_obj2.next == new_obj3
+    assert new_obj2.prev == new_obj
 
 def test_list_class():
     """Test List creation."""
 
     custom_list = LIST((1, 2, "apple"))
+    custom_list1 = List((1, 2, "apple"))
+
     assert str(custom_list) == "[1, 2, 'apple']"
+    assert custom_list1._first_node.data == 1
+    assert custom_list1._last_node.data == 'apple'
+    assert custom_list1._first_node.next.next == custom_list1._last_node
 
 def test_list_len():
     """Test len()."""
@@ -137,9 +147,27 @@ def test_insert():
     assert str(custom_list) == "['insert1', 1, 2, 'apple', 'insert5']"
 
     custom_list.insert(-1, "insert_last")
-    assert custom_list[-1] == "insert5"
     assert str(custom_list) == "['insert1', 1, 2, 'apple', 'insert_last', 'insert5']"
-    
+    assert custom_list[-1] == "insert5"
+
+def test_insert():
+    """"""
+
+    custom_list = List((1, 2))
+
+    custom_list.insert(0, "insert1")
+    custom_list.insert(4, "insert5")
+    custom_list.insert(-1, "insert_last")
+    assert str(custom_list) == "['insert1', 1, 2, 'insert_last', 'insert5']"
+    assert custom_list._first_node.prev is None
+    assert custom_list._first_node.next.data == 1
+    assert custom_list._last_node.next is None
+    assert custom_list._last_node.prev.data == 'insert_last'
+    assert custom_list._first_node.next.data == 1
+    assert custom_list._first_node.next.next.data == 2
+    assert custom_list._first_node.next.next.next.data == 'insert_last'
+    assert custom_list._first_node.next.next.next.next.data == 'insert5'
+
 def test_remove():
     custom_list2 = LIST((1, 2, "apple", 2))
 
@@ -208,7 +236,7 @@ def test_reverse():
     custom_list2 = LIST((1, "apple", 2, 2, None))
     
     assert str(custom_list2) == "[1, 'apple', 2, 2, None]"
-    assert custom_list2.reverse() == None
+    custom_list2.reverse()
     assert str(custom_list2) == "[None, 2, 2, 'apple', 1]"
 
 def test_copy():
@@ -217,4 +245,3 @@ def test_copy():
     copy_list.append(2)
 
     assert copy_list != custom_list
-    
