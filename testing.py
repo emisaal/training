@@ -92,14 +92,6 @@ def test_set_item():
         empty_list[0]
         custom_list[5]
 
-def test_iter():
-    """"""
-
-    custom_list2 = LIST(("a", "b", 777))
-
-    assert [data for data in custom_list2] == ["a", "b", 777]
-    assert [data for data in empty_list] == []
-
 def test_del_item():
     custom_list = LIST((1, 2, "apple"))
     custom_list2 = LIST(("a", "b", 777))
@@ -149,20 +141,12 @@ def test_insert():
     assert str(custom_list) == "['insert1', 1, 2, 'apple', 'insert_last', 'insert5']"
     
 def test_remove():
-    """"""
-
-    custom_list = LIST((1, 2, "apple"))
     custom_list2 = LIST((1, 2, "apple", 2))
-
-    custom_list.remove(2)
-    assert str(custom_list) == "[1, 'apple']"
 
     assert custom_list2.remove("apple") == None
     assert str(custom_list2) == "[1, 2, 2]"
 
 def test_pop():
-    """"""
-
     custom_list = LIST((1, 2, "apple"))
     custom_list2 = LIST((1, 2, "apple", 2))
     
@@ -179,8 +163,6 @@ def test_pop():
     assert len(custom_list2) == 3
 
 def test_clear():
-    """"""
-
     custom_list = LIST((1, 2, "apple"))
     custom_list.clear()
 
@@ -188,21 +170,51 @@ def test_clear():
     assert str(custom_list) == "[]"
 
 def test_count_contains():
-    """"""
-
-    custom_list = LIST((1, 2, "apple"))
-    
-    assert custom_list.count(2) == 1
-    assert custom_list.__contains__(2) == True
-    assert custom_list.count("apple") == 1
-    assert custom_list.count(999) == 0
-    assert custom_list.__contains__(999) == False
-
     custom_list2 = LIST((1, 2, 2, "apple", 2, 2, None))
 
     assert custom_list2.count(2) == 4
-    assert custom_list2.__contains__(2) == True
+    assert 2 in custom_list2
+    assert custom_list2.count("apple") == 1
     assert custom_list2.count(None) == 1
     assert custom_list2.count(0) == 0
-    assert custom_list2.__contains__(0) == False
+    assert 0 not in custom_list2
 
+def test_iter():
+    """"""
+
+    custom_list2 = LIST(("a", "b", 777))
+
+    assert [data for data in custom_list2] == ["a", "b", 777]
+    assert [data for data in empty_list] == []
+
+def test_index():
+    custom_list2 = LIST((1, 2, 2, "apple", 2, 2, None))
+
+    assert custom_list2.index("apple") == 3
+    assert custom_list2.index(2) == 1
+    with pytest.raises(ValueError):
+        custom_list2.index(888)
+        custom_list2.index("apple", 4)
+        assert custom_list2.index(2, -1)
+    
+    assert custom_list2.index(2, 3) == 4
+    assert custom_list2.index(2, 2) == 2
+    assert custom_list2.index(2, 0, -1) == 1
+    assert custom_list2.index(None, -3) == 6
+    assert custom_list2.index(None, 4) == 6
+    assert custom_list2.index("apple", 3) == 3
+
+def test_reverse():
+    custom_list2 = LIST((1, "apple", 2, 2, None))
+    
+    assert str(custom_list2) == "[1, 'apple', 2, 2, None]"
+    assert custom_list2.reverse() == None
+    assert str(custom_list2) == "[None, 2, 2, 'apple', 1]"
+
+def test_copy():
+    custom_list = LIST((1, 2, "apple"))
+    copy_list = custom_list.copy()
+    copy_list.append(2)
+
+    assert copy_list != custom_list
+    

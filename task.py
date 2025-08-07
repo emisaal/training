@@ -6,7 +6,6 @@ class _Node:
         self.next = next
 
 
-
 class List:
     def __init__(self, args: any = None) -> None:
         self._first_node = None
@@ -36,18 +35,6 @@ class List:
     def __len__(self) -> int:
         """Called to implement the built-in function len()."""
         return self._length
-
-    def _reverse(self, node):
-        """"""
-
-        reversed_string = str(node.data)
-
-        if node.next is not None:
-            return self._reverse(node.next)  + ', '+  reversed_string
-        return reversed_string  # last node
-
-    def _get_reversed_list(self):
-        return self._reverse(node=self._first_node)
 
     def _get_positive_index(self, index: int) -> int:
         """Change provided index into a positive index."""
@@ -172,23 +159,37 @@ class List:
 
         self._remove_item(index=index)
 
-    def __contains__(self, item: any) -> bool:
+    def __contains__(self, data: any) -> bool:
         """Called to implement membership test operators."""
 
-        if self.count(data=item) > 0:
-            return True
-        return False
+        for node_data in self:
+            if node_data == data:
+                return True
+
+    def _node_iter(self):
+        """Iterate nodes."""
+        node = self._first_node
+        while node is not None:
+            yield node
+            node = node.next
 
     def __iter__(self) -> None:
         """This method is called when an iterator is required for a container."""
 
-        node = self._first_node
-        while node is not None:
+        for node in self._node_iter():
             yield node.data
-            node = node.next
+
+    def _reverse_node_iter(self, node):
+        """Reverse iteration."""
+
+        if node.next is not None:
+            yield from self._reverse_node_iter(node.next)
+        yield node
 
     def __reversed___(self) -> None:
-        pass
+        """Called (if present) by the reversed() built-in to implement reverse iteration."""
+        for node in self._reverse_node_iter(self._first_node):
+            yield node.data
 
     def append(self, data: any) -> None:
         """Add an item to the end of the list."""
@@ -248,6 +249,24 @@ class List:
         self._first_node = None
         self._length = 0
 
+    def index(self, data: any, start: int = 0, stop: int = -1):
+        """Return zero-based index in the list of the first item whose value is equal to x."""
+
+        idx = 0
+        start, stop = self._get_positive_index(start), self._get_positive_index(stop)
+
+        for node_data in self:
+            if idx < start:
+                idx += 1
+                continue
+            if idx > stop:
+                break
+            if node_data == data:
+                return idx
+            idx += 1
+
+        raise ValueError
+
     def count(self, data: any) -> int:
         """Return the number of times x appears in the list."""
 
@@ -257,3 +276,28 @@ class List:
                 count += 1
  
         return count
+
+    def sort(self, key: any, reverse: bool = False):
+         """Sort the items of the list in place."""
+         pass
+    
+    def reverse(self):
+        """Reverse the elements of the list in place."""
+
+        # [1, 2, 3]
+        prev_node = None # '3, none' -> '3, 2' -> '2, 1' -> '1, 2'
+
+        for node in self._reverse_node_iter(self._first_node):
+
+            if prev_node is None:
+                prev_node = node
+                self._first_node = node
+                continue
+
+            prev_node.next = node
+            prev_node = node
+
+        prev_node.next = None
+
+    def copy(self):
+        return List(self)
