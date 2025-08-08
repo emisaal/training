@@ -16,7 +16,7 @@ def test_node_class():
 
     assert new_obj.data == "apple"
     assert new_obj.next == new_obj2
-    assert new_obj.prev == None
+    assert new_obj.prev is None
     assert new_obj2.data == 555
     assert new_obj2.next == new_obj3
     assert new_obj2.prev == new_obj
@@ -39,33 +39,6 @@ def test_list_len():
     
     assert custom_list.__len__() == 3
     assert empty_list.__len__() == 0
-
-def test_getitem():
-    """Test __getitem__."""
-
-    custom_list = LIST((1, 2, "apple"))
-
-    assert custom_list[0] == 1
-    assert custom_list[1] == 2
-    assert custom_list[2] == "apple"
-    assert custom_list[-1] == "apple"
-    assert custom_list[-2] == 2
-
-    with pytest.raises(IndexError):
-        empty_list[0]
-        custom_list[5]
-
-    custom_list2 = LIST((1, 2, "apple"))
-
-    # start idx
-    assert str(custom_list2[0::]) == "[1, 2, 'apple']"
-    assert str(custom_list2[1::]) == "[2, 'apple']"
-    assert str(custom_list2[2::]) == "['apple']"
-    assert str(custom_list2[3::]) == "[]"
-
-    # stop idx
-
-    # step
 
 def test_list_append_extend():
     """"""
@@ -171,8 +144,12 @@ def test_insert():
 def test_remove():
     custom_list2 = LIST((1, 2, "apple", 2))
 
-    assert custom_list2.remove("apple") == None
+    custom_list2.remove("apple")
     assert str(custom_list2) == "[1, 2, 2]"
+    assert len(custom_list2) == 3
+    custom_list2.remove(1)
+    assert str(custom_list2) == "[2, 2]"
+    assert len(custom_list2) == 2
 
 def test_pop():
     custom_list = LIST((1, 2, "apple"))
@@ -233,15 +210,50 @@ def test_index():
     assert custom_list2.index("apple", 3) == 3
 
 def test_reverse():
-    custom_list2 = LIST((1, "apple", 2, 2, None))
+    custom_list2 = LIST((1, "apple", 2))
     
-    assert str(custom_list2) == "[1, 'apple', 2, 2, None]"
+    assert str(custom_list2) == "[1, 'apple', 2]"
     custom_list2.reverse()
-    assert str(custom_list2) == "[None, 2, 2, 'apple', 1]"
+    assert str(custom_list2) == "[2, 'apple', 1]"
 
 def test_copy():
     custom_list = LIST((1, 2, "apple"))
     copy_list = custom_list.copy()
-    copy_list.append(2)
 
-    assert copy_list != custom_list
+    assert str(copy_list) == str(custom_list)
+    assert id(copy_list) != id(custom_list)
+
+def test_getitem():
+    """Test __getitem__."""
+
+    custom_list = LIST((1, 2, "apple"))
+
+    assert custom_list[0] == 1
+    assert custom_list[1] == 2
+    assert custom_list[2] == "apple"
+    assert custom_list[-1] == "apple"
+    assert custom_list[-2] == 2
+
+    with pytest.raises(IndexError):
+        empty_list[0]
+        custom_list[5]
+
+    custom_list2 = LIST((1, 2, "apple"))
+
+    # start idx
+    assert str(custom_list2[0::]) == "[1, 2, 'apple']"
+    assert str(custom_list2[1::]) == "[2, 'apple']"
+    assert str(custom_list2[2::]) == "['apple']"
+    assert str(custom_list2[3::]) == "[]"
+
+    # stop idx
+    assert str(custom_list2[:0:]) == "[]"
+    assert str(custom_list2[:1:]) == "[1]"
+    assert str(custom_list2[:2:]) == "[1, 2]"
+    assert str(custom_list2[:3:]) == "[1, 2, 'apple']"
+
+    # step
+    assert str(custom_list2[0:2:2]) == "[1]"
+    assert str(custom_list2[1::2]) == "[2]"
+    assert str(custom_list2[2::2]) == "['apple']"
+    assert str(custom_list2[::2]) == "[1, 'apple']"

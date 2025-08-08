@@ -1,4 +1,5 @@
-from typing import Self
+from typing import Self, Generator
+
 
 class _Node:
     def __init__(self, data: any, next: Self | None = None, prev: Self | None = None) -> None:
@@ -22,15 +23,14 @@ class List:
             return
 
         self._length += len(args)
+        node = None
 
         for data in args:
             if self._first_node is None:
-                self._first_node = _Node(data=data)
-                node = self._first_node
+                self._first_node = node = _Node(data=data)
                 continue
 
-            next_node = _Node(data=data, prev=node)
-            node.next = next_node
+            node.next = next_node = _Node(data=data, prev=node)
             node = next_node
 
         self._last_node = node
@@ -63,92 +63,52 @@ class List:
 
         raise IndexError
 
-    def _remove_item(self, index: int | None = None, data: any = '') -> any:
-        """Remove item based on provided index or data."""
+    def _remove_node(self, node: _Node):
+        """Remove provided node."""
 
-        if index is not None:
-            if not isinstance(index, int):
-                raise TypeError
+        match node:
+            case self._first_node:
+                self._first_node = node.next
+                self._first_node.prev = None
 
-            if index == 0:
-                out_data = self._first_node.data
-                self._first_node = self._first_node.next
-                self._length -= 1
-                return out_data
+            case self._last_node:
+                self._last_node = node.prev
+                self._last_node.next = None
 
-            index = self._get_positive_index(index)
-            prev_node = self._find_node(index - 1)
-            out_data = prev_node.next.data
+            case _:
+                node.prev.next = node.next
+                node.next.prev = node.prev
 
-            if index == self._length - 1:
-                prev_node.next = None
-            else:
-                prev_node.next = prev_node.next.next
-
-            self._length -= 1
-            return out_data
-
-        if data != '':
-            node = self._first_node
-            prev_node = self._first_node
-
-            while node is not None:
-                if node.data != data:
-                    prev_node = node
-                    node = node.next
-                    continue
-
-                prev_node.next = node.next
-                self._length -= 1
-                return node.data
-
-            raise ValueError
-
-    def _get_start_stop_step(self, index: slice) -> tuple:
-        """"""
-        
-        start_idx = 0
-        stop_idx = self._get_positive_index(-1)
-        step = 1 if index.step is None else index.step
-
-        if index.start is not None:
-            start_idx = self._get_positive_index(index.start)
-
-        if index.stop is not None:
-            stop_idx = self._get_positive_index(index.stop)
-
-        return start_idx, stop_idx, step
+        self._length -= 1
 
     def __getitem__(self, index: int | slice) -> any:
         """Called to implement evaluation of self[key]."""
 
         if isinstance(index, int):
-            node = self._find_node(index)
-            return node.data
+            return self._find_node(index).data
 
         elif isinstance(index, slice):
-            start_idx, stop_idx, step = self._get_start_stop_step(index)
-            out_data = ''
+            out_list = List()
+            start, stop, step = index.indices(self._length)
+
+            if stop == 0:
+                return out_list
+            
             idx = 0
+            for node in self._node_iter():
+                if node is None or idx >= stop:
+                    return out_list
 
-            if stop_idx == 0 or start_idx >= self._length:
-                return '[]'
+                if idx >= start and (idx - start) % step == 0:
+                    out_list.append(node.data)
 
-            for node_data in self:
-                if idx >= start_idx:
-                    out_data += f'{repr(node_data)}'
-                else:
-                    idx += 1
-                    continue
-
-                if idx >= stop_idx:
-                    return f'[{out_data}]'
                 idx += 1
-                out_data += f', '
+
+            return out_list
 
         raise TypeError
 
-    def __setitem__(self, index, data) -> None:
+    def __setitem__(self, index: int, data: any) -> None:
         """Called to implement assignment to self[key]."""
 
         if not isinstance(index, int):
@@ -160,36 +120,33 @@ class List:
     def __delitem__(self, index: int) -> None:
         """Called to implement deletion of self[key]."""
 
-        self._remove_item(index=index)
+        if not isinstance(index, int):
+            raise TypeError
+
+        node = self._find_node(index)
+        self._remove_node(node)
 
     def __contains__(self, data: any) -> bool:
         """Called to implement membership test operators."""
 
-        for node_data in self:
-            if node_data == data:
-                return True
+        return any(node_data == data for node_data in self)
 
-    def _node_iter(self, last: bool = False):
+    def _node_iter(self, last: bool = False) -> Generator:
         """Iterate nodes."""
         node = self._last_node if last else self._first_node
         while node is not None:
             yield node
-            node = node.next if self._first_node else node.prev
+            node = node.prev if last else node.next
 
-    def __iter__(self) -> None:
+    def __iter__(self) -> Generator:
         """This method is called when an iterator is required for a container."""
 
         for node in self._node_iter():
             yield node.data
 
-    def _reverse_node_iter(self, node):
-        """Reverse iteration."""
-
-        self._node_iter(last=True)
-
-    def __reversed___(self) -> None:
+    def __reversed___(self) -> Generator:
         """Called (if present) by the reversed() built-in to implement reverse iteration."""
-        for node in _reverse_node_iter():
+        for node in self._node_iter(last=True):
             yield node.data
 
     def append(self, data: any) -> None:
@@ -250,18 +207,31 @@ class List:
     def remove(self, data: any) -> None:
         """Remove the first item from the list whose value is equal to data."""
 
-        self._remove_item(data=data)
+        for node in self._node_iter():
+            if node.data != data:
+                continue
+
+            self._remove_node(node)
+            return node.data
+
+        raise ValueError
 
     def pop(self, index: int = -1) -> any:
         """Remove the item at the given position in the list, and return it."""
 
-        data = self._remove_item(index=index)
-        return data
+        if not isinstance(index, int):
+            raise TypeError
+
+        node = self._find_node(index)
+        self._remove_node(node)
+
+        return node.data
 
     def clear(self) -> None:
         """Remove all items from the list."""
 
         self._first_node = None
+        self._last_node = None
         self._length = 0
 
     def index(self, data: any, start: int = 0, stop: int = -1):
@@ -296,15 +266,22 @@ class List:
         """Reverse the elements of the list in place."""
 
         prev_node = None
+
         for node in self._node_iter(last=True):
-            node.next = node.prev
-            node.prev = prev_node
-
             if prev_node is None:
-                self._first_node = node
+                self._first_node = prev_node = node
+                continue
 
+            prev_node.next = node
             prev_node = node
-        self._last_node = node
+
+        self._first_node.prev = None
+
+        self._last_node = prev_node
+        self._last_node.next = None
 
     def copy(self):
-        return List(self)
+        new_list = List()
+        for node in self:
+            new_list.append(node)
+        return new_list
