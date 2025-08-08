@@ -78,12 +78,14 @@ class List:
             raise IndexError
 
         index = self._get_positive_index(index)
-        idx = 0
 
-        for node in self._node_iter():
+        last = index > self._length / 2
+        idx = self._length - 1 if last else 0
+
+        for node in self._node_iter(last):
             if idx == index:
                 return node
-            idx += 1
+            idx += -1 if last else 1
 
         raise IndexError
 
@@ -219,7 +221,7 @@ class List:
             self._length = 1
             return
 
-        if index < -1:
+        if index < - 1:
             index = self._get_positive_index(index)
 
         if index >= self._length:
