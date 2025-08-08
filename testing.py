@@ -106,7 +106,6 @@ def test_del_item():
     assert custom_list3[-4] == 71
     assert custom_list3[2] == "apple"
 
-
 def test_insert():
     """"""
 

@@ -48,12 +48,8 @@ class List:
     def __add__(self, item: Self) -> Self:
         """Add two lists."""
         new_list = List()
-
-        for node in self:
-            new_list.append(node)
-        
-        for node in item:
-            new_list.append(node)
+        new_list.extend(self)
+        new_list.extend(item)
 
         return new_list
 
@@ -61,8 +57,7 @@ class List:
         new_list = List()
         
         for _ in range(num):
-            for node in self:
-                new_list.append(node)
+            new_list.append(self)
 
         return new_list
 
@@ -205,6 +200,7 @@ class List:
 
     def _node_iter(self, last: bool = False) -> Generator:
         """Iterate nodes."""
+
         node = self._last_node if last else self._first_node
         while node is not None:
             yield node
