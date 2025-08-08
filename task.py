@@ -17,7 +17,7 @@ class List:
         if args is None:
             return
 
-        if not isinstance(args, tuple):
+        if isinstance(args, int | float | str | None):
             self._first_node = self._last_node = _Node(data=args)
             self._length = 1
             return

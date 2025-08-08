@@ -24,9 +24,11 @@ def test_node_class():
 def test_list_class():
     """Test List creation."""
 
+    custom_list_range = LIST(range(1, 10))
     custom_list = LIST((1, 2, "apple"))
     custom_list1 = List((1, 2, "apple"))
 
+    assert str(custom_list_range) == "[1, 2, 3, 4, 5, 6, 7, 8, 9]"
     assert str(custom_list) == "[1, 2, 'apple']"
     assert custom_list1._first_node.data == 1
     assert custom_list1._last_node.data == 'apple'
@@ -286,4 +288,41 @@ def test_append_slice():
 
     assert str(custom_list2) == "[1, 2, 'apple', 555]"
     assert str(custom_list3) == "[1, 2, 'apple', 888, 777]"
+
+def test_slicing():
+    custom_list = LIST((0, 1, 2, 3, 4, 5))
+
+    assert str(custom_list[1:4]) == "[1, 2, 3]"
+    assert str(custom_list[:3]) == "[0, 1, 2]"
+    assert str(custom_list[3:]) == "[3, 4, 5]"
+    assert str(custom_list[:]) == str(custom_list)
+
+def test_negative_indices():
+    custom_list = LIST((10, 20, 30, 40, 50))
+
+    assert str(custom_list[-1]) == "50"
+    assert str(custom_list[-3:-1]) == "[30, 40]"
+    assert str(custom_list[:-2]) == "[10, 20, 30]"
+
+def test_step_slicing():
+    custom_list = LIST((0, 1, 2, 3, 4, 5, 6))
+
+    assert str(custom_list[::2]) == "[0, 2, 4, 6]"
+    assert str(custom_list[1::2]) == "[1, 3, 5]"
+    # assert str(custom_list[::-1]) == "[6, 5, 4, 3, 2, 1, 0]"
+
+def test_edge_cases():
+    custom_list = LIST((1, 2, 3))
+
+    assert str(custom_list[10:]) == "[]"
+    assert str(custom_list[:10]) == "[1, 2, 3]"
+    assert str(custom_list[-10:]) == "[1, 2, 3]"
+    assert str(custom_list[1:1]) == "[]"
+
+def test_empty_list():
+    custom_list = LIST()
+
+    assert str(custom_list[:]) == "[]"
+    assert str(custom_list[1:3]) == "[]"
+    assert str(custom_list[::-1])== "[]"
 
