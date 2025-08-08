@@ -41,6 +41,30 @@ class List:
     def __len__(self) -> int:
         """Called to implement the built-in function len()."""
         return self._length
+    
+    def __eq__(self, item: Self) -> bool:
+        return str(self) == str(item)
+
+    def __add__(self, item: Self) -> Self:
+        """Add two lists."""
+        new_list = List()
+
+        for node in self:
+            new_list.append(node)
+        
+        for node in item:
+            new_list.append(node)
+
+        return new_list
+
+    def __mul__(self, num: int) -> Self:
+        new_list = List()
+        
+        for _ in range(num):
+            for node in self:
+                new_list.append(node)
+
+        return new_list
 
     def _get_positive_index(self, index: int) -> int:
         """Change provided index into a positive index."""
@@ -108,14 +132,38 @@ class List:
 
         raise TypeError
 
-    def __setitem__(self, index: int, data: any) -> None:
+    def __setitem__(self, index: int | slice, data: any) -> None:
         """Called to implement assignment to self[key]."""
 
-        if not isinstance(index, int):
+        if isinstance(index, int):
+            if index == self._length:
+                self.insert(-1, data)
+
+            node = self._find_node(index)
+            node.data = data
+            return
+
+        if not isinstance(index, slice):
             raise TypeError
 
-        node = self._find_node(index)
-        node.data = data
+        if index.start >= self._length - 1:
+            for item in data:
+                self.insert(self._length, item)
+            return
+
+        start, stop, step = index.indices(self._length)
+
+        idx = 0
+        data_idx = 0
+
+        for node in self._node_iter():
+            if idx > stop or data_idx > len(data) - 1:
+                return
+            if start <= idx <= stop:
+                node.data = data[data_idx]
+                data_idx += 1
+
+            idx += 1
 
     def __delitem__(self, index: int) -> None:
         """Called to implement deletion of self[key]."""

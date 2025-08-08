@@ -257,3 +257,28 @@ def test_getitem():
     assert str(custom_list2[1::2]) == "[2]"
     assert str(custom_list2[2::2]) == "['apple']"
     assert str(custom_list2[::2]) == "[1, 'apple']"
+
+def test_eq_add_mul():
+    custom_list1 = LIST((1, 2, "apple"))
+    custom_list2 = LIST((1, 2, "apple"))
+
+    assert custom_list1 == custom_list2
+
+    custom_list3 = custom_list1 + custom_list2
+    assert str(custom_list3) == "[1, 2, 'apple', 1, 2, 'apple']"
+
+    custom_list4 = custom_list1 + custom_list2 + custom_list3
+    assert str(custom_list4) == "[1, 2, 'apple', 1, 2, 'apple', 1, 2, 'apple', 1, 2, 'apple']"
+
+    custom_list4 = custom_list1 * 3
+    assert str(custom_list4) == "[1, 2, 'apple', 1, 2, 'apple', 1, 2, 'apple']"
+
+def test_append_slice():
+    custom_list2 = LIST((1, 2, "apple"))
+    custom_list2[len(custom_list2):] = [555]
+
+    custom_list3 = LIST((1, 2, "apple"))
+    custom_list3[len(custom_list2):] = [555, 777]
+
+    assert str(custom_list2) == "[1, 2, 'apple', 555]"
+    # assert str(custom_list3) == "[1, 2, 'apple', 555, 555, 777]"
