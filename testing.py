@@ -174,6 +174,11 @@ def test_clear():
     assert len(custom_list) == 0
     assert str(custom_list) == "[]"
 
+    custom_list2 = LIST((1, 2, "apple"))
+    del custom_list2[:]
+    assert len(custom_list2) == 0
+    assert str(custom_list2) == "[]"
+
 def test_count_contains():
     custom_list2 = LIST((1, 2, 2, "apple", 2, 2, None))
 
@@ -278,7 +283,8 @@ def test_append_slice():
     custom_list2[len(custom_list2):] = [555]
 
     custom_list3 = LIST((1, 2, "apple"))
-    custom_list3[len(custom_list2):] = [555, 777]
+    custom_list3[len(custom_list2):] = [888, 777]
 
     assert str(custom_list2) == "[1, 2, 'apple', 555]"
-    # assert str(custom_list3) == "[1, 2, 'apple', 555, 555, 777]"
+    assert str(custom_list3) == "[1, 2, 'apple', 888, 777]"
+

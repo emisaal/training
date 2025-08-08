@@ -95,7 +95,8 @@ class List:
         match node:
             case self._first_node:
                 self._first_node = node.next
-                self._first_node.prev = None
+                if node.next is not None:
+                    self._first_node.prev = None
 
             case self._last_node:
                 self._last_node = node.prev
@@ -149,6 +150,10 @@ class List:
             raise TypeError
 
         if index.start >= self._length - 1:
+            if isinstance(data, int | str | float | None):
+                self.insert(self._length, data)
+                return
+
             for item in data:
                 self.insert(self._length, item)
             return
@@ -167,14 +172,31 @@ class List:
 
             idx += 1
 
-    def __delitem__(self, index: int) -> None:
+    def __delitem__(self, index: int | slice) -> None:
         """Called to implement deletion of self[key]."""
 
-        if not isinstance(index, int):
+        if not isinstance(index, int | slice):
             raise TypeError
 
-        node = self._find_node(index)
-        self._remove_node(node)
+        elif isinstance(index, int):
+            node = self._find_node(index)
+            self._remove_node(node)
+            return
+
+        start, stop, step = index.indices(self._length)
+
+        if stop == 0:
+            return
+
+        idx = 0
+        for node in self._node_iter():
+            if node is None or idx >= stop:
+                return
+
+            if idx >= start and (idx - start) % step == 0:
+                self._remove_node(node)
+
+            idx += 1
 
     def __contains__(self, data: any) -> bool:
         """Called to implement membership test operators."""
@@ -202,13 +224,13 @@ class List:
     def append(self, data: any) -> None:
         """Add an item to the end of the list."""
 
-        self.insert(self._length, data)
+        self[self._length:] = data
+        # self.insert(self._length, data)
     
     def extend(self, args) -> None:
         """Extend the list by appending all the items from the iterable."""
 
-        for data in args:
-            self.append(data)
+        self[self._length:] = args
 
     def insert(self, index: int, data: any) -> None:
         """Insert an item at a given position."""
@@ -330,7 +352,8 @@ class List:
         self._last_node = prev_node
         self._last_node.next = None
 
-    def copy(self):
+    def copy(self) -> Self:
+        """Return a shallow copy of the list."""
         new_list = List()
         for node in self:
             new_list.append(node)
